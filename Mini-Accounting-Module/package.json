@@ -2,11 +2,15 @@
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
+    "dependencies": {
+        "vue": "^3.5.16"
+    },
     "scripts": {
         "build": "vite build",
         "dev": "vite"
     },
     "devDependencies": {
+        "@vitejs/plugin-vue": "^6.0.0",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
