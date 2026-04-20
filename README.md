@@ -7,9 +7,9 @@ The application demonstrates basic accounting workflows based on double-entry ac
 
 ## Tech Stack
 
-Backend: Laravel
-Frontend: Vue.js
-Database: SQLite
+- **Backend:** Laravel
+- **Frontend:** Vue.js
+- **Database:** SQLite
 
 ---
 
