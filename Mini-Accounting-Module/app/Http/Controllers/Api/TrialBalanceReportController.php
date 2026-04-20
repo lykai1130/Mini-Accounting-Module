@@ -31,8 +31,8 @@ class TrialBalanceReportController extends Controller
             ->groupBy('journal_lines.account_id')
             ->select([
                 'journal_lines.account_id',
-                DB::raw("SUM(CASE WHEN journal_lines.type = 'debit' THEN journal_lines.amount ELSE 0 END) as total_debit"),
-                DB::raw("SUM(CASE WHEN journal_lines.type = 'credit' THEN journal_lines.amount ELSE 0 END) as total_credit"),
+                DB::raw("SUM(CASE WHEN lower(journal_lines.type) IN ('debit', 'dr') THEN journal_lines.amount ELSE 0 END) as total_debit"),
+                DB::raw("SUM(CASE WHEN lower(journal_lines.type) IN ('credit', 'cr') THEN journal_lines.amount ELSE 0 END) as total_credit"),
             ]);
 
         $rows = Account::query()
@@ -59,4 +59,3 @@ class TrialBalanceReportController extends Controller
         ]);
     }
 }
-

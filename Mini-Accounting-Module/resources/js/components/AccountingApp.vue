@@ -74,6 +74,16 @@ function money(value) {
     });
 }
 
+function balanceMoney(value) {
+    const numericValue = Number(value || 0);
+
+    if (numericValue < 0) {
+        return `(${money(Math.abs(numericValue))})`;
+    }
+
+    return money(numericValue);
+}
+
 function addLine() {
     entryForm.lines.push({
         account_id: null,
@@ -330,7 +340,7 @@ onMounted(() => {
                                 <td class="capitalize">{{ row.type }}</td>
                                 <td class="right">{{ money(row.total_debit) }}</td>
                                 <td class="right">{{ money(row.total_credit) }}</td>
-                                <td class="right">{{ money(row.balance) }}</td>
+                                <td class="right">{{ balanceMoney(row.balance) }}</td>
                             </tr>
                         </tbody>
                         <tfoot>
@@ -338,7 +348,7 @@ onMounted(() => {
                                 <th colspan="3">Totals</th>
                                 <th class="right">{{ money(state.summary.total_debit) }}</th>
                                 <th class="right">{{ money(state.summary.total_credit) }}</th>
-                                <th class="right">{{ money(state.summary.total_debit - state.summary.total_credit) }}</th>
+                                <th class="right">{{ balanceMoney(state.summary.total_debit - state.summary.total_credit) }}</th>
                             </tr>
                         </tfoot>
                     </table>

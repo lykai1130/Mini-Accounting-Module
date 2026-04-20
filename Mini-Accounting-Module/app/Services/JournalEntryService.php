@@ -10,7 +10,6 @@ class JournalEntryService
     /**
      * @param  array{
      *     entry_date: string,
-     *     reference_no?: string|null,
      *     description?: string|null,
      *     lines: array<int, array{
      *         account_id: int,
@@ -20,21 +19,19 @@ class JournalEntryService
      *     }>
      * }  $payload
      */
-    public function create(array $payload, ?int $createdBy = null): JournalEntry
+    public function create(array $payload): JournalEntry
     {
-        return DB::transaction(function () use ($payload, $createdBy): JournalEntry {
+        return DB::transaction(function () use ($payload): JournalEntry {
             $entry = JournalEntry::query()->create([
                 'entry_date' => $payload['entry_date'],
-                'reference_no' => $payload['reference_no'] ?? null,
                 'description' => $payload['description'] ?? null,
-                'created_by' => $createdBy,
             ]);
 
             $entry->lines()->createMany(
                 collect($payload['lines'])
                     ->map(fn (array $line): array => [
                         'account_id' => $line['account_id'],
-                        'type' => $line['type'],
+                        'type' => $this->normalizeLineType($line['type']),
                         'amount' => $line['amount'],
                         'line_description' => $line['line_description'] ?? null,
                     ])
@@ -44,5 +41,11 @@ class JournalEntryService
             return $entry->load('lines.account');
         });
     }
-}
 
+    private function normalizeLineType(string $type): string
+    {
+        $normalized = strtolower(trim($type));
+
+        return in_array($normalized, ['dr', 'debit'], true) ? 'dr' : 'cr';
+    }
+}

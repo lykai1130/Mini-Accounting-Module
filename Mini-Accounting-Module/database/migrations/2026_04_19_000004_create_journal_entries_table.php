@@ -14,13 +14,10 @@ return new class extends Migration
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
             $table->date('entry_date');
-            $table->string('reference_no', 100)->nullable();
             $table->string('description', 255)->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->index('entry_date');
-            $table->index('reference_no');
         });
     }
 
@@ -32,4 +29,3 @@ return new class extends Migration
         Schema::dropIfExists('journal_entries');
     }
 };
-

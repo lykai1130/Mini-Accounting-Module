@@ -26,7 +26,6 @@ class JournalEntryApiTest extends TestCase
 
         $payload = [
             'entry_date' => '2026-04-19',
-            'reference_no' => 'JV-001',
             'description' => 'Cash sale',
             'lines' => [
                 [
@@ -50,7 +49,18 @@ class JournalEntryApiTest extends TestCase
             ->assertJsonCount(2, 'data.lines');
 
         $this->assertDatabaseHas('journal_entries', [
-            'reference_no' => 'JV-001',
+            'description' => 'Cash sale',
+        ]);
+
+        $this->assertDatabaseHas('journal_lines', [
+            'account_id' => $cash->id,
+            'type' => 'dr',
+            'amount' => 100,
+        ]);
+        $this->assertDatabaseHas('journal_lines', [
+            'account_id' => $income->id,
+            'type' => 'cr',
+            'amount' => 100,
         ]);
 
         $this->assertDatabaseCount('journal_lines', 2);
@@ -113,7 +123,6 @@ class JournalEntryApiTest extends TestCase
 
         $payload = [
             'entry_date' => '2026-04-19',
-            'reference_no' => 'JV-DELETE-001',
             'description' => 'Delete me',
             'lines' => [
                 [
