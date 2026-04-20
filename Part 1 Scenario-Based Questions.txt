@@ -1,0 +1,36 @@
+Part 1: Scenario-Based Questions
+
+1. Roles handle most access, while permissions allow finer control. In Laravel, we can manage this through pivot tables and enforce it with middleware, gates, and policies.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+2. Setup redis in .env
+
+CACHE_STORE=redis
+REDIS_CLIENT=phpredis
+
+Setup host and port, in Laravel use Cache::remember, also there are more methods to use for Cache such as get(), put(), forget().
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+3. Avoid select *, avoid N+1, use with() instead of loading data inside a loop. Also in .env we can use DEBUGBAR_ENABLED or QUERY_LOGGING to monitor the query amount.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+4. Jobs are tasks like sending emails or generating reports. Queues let these tasks run in the background, so the system stays fast and the user doesn’t have to wait.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+5. Laravel service container used to resolving classes and managing dependencies. Reusable function or query implement in service and called from controller instead of reimplement the same function in every controller. This makes the code more easier to maintain.
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+6. In Laravel backend using API to pass JSON data to NuxtJS frontend
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+7. N/A
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+8. Can refer to the ER Diagram in the GitHub link
