@@ -62,5 +62,13 @@ class JournalEntryController extends Controller
             'data' => $entry,
         ], 201);
     }
-}
 
+    public function destroy(JournalEntry $journalEntry): JsonResponse
+    {
+        $journalEntry->delete();
+
+        return response()->json([
+            'message' => 'Journal entry deleted successfully.',
+        ]);
+    }
+}

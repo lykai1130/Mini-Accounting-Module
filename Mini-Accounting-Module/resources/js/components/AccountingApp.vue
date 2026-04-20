@@ -9,6 +9,7 @@ const monthStart = `${today.slice(0, 8)}01`;
 const state = reactive({
     loading: false,
     saving: false,
+    deletingEntryId: null,
     error: '',
     success: '',
     accounts: [],
@@ -27,7 +28,6 @@ const reportFilters = reactive({
 
 const entryForm = reactive({
     entry_date: today,
-    reference_no: '',
     description: '',
     lines: [
         { account_id: null, type: 'debit', amount: null, line_description: '' },
@@ -91,6 +91,27 @@ function removeLine(index) {
     entryForm.lines.splice(index, 1);
 }
 
+function formatDateOnly(value) {
+    if (!value) {
+        return '';
+    }
+
+    const valueAsString = String(value);
+    const yyyyMmDdPrefix = valueAsString.match(/^(\d{4}-\d{2}-\d{2})/);
+
+    if (yyyyMmDdPrefix) {
+        return yyyyMmDdPrefix[1];
+    }
+
+    const parsedDate = new Date(valueAsString);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+        return valueAsString;
+    }
+
+    return parsedDate.toISOString().slice(0, 10);
+}
+
 async function fetchAccounts() {
     const response = await window.axios.get('/api/accounts');
     state.accounts = response.data.data;
@@ -111,7 +132,6 @@ async function fetchTrialBalance() {
 
 function clearEntryForm() {
     entryForm.entry_date = today;
-    entryForm.reference_no = '';
     entryForm.description = '';
     entryForm.lines = [
         { account_id: null, type: 'debit', amount: null, line_description: '' },
@@ -127,7 +147,6 @@ async function submitEntry() {
     try {
         const payload = {
             entry_date: entryForm.entry_date,
-            reference_no: entryForm.reference_no || null,
             description: entryForm.description || null,
             lines: entryForm.lines.map((line) => ({
                 account_id: line.account_id,
@@ -154,6 +173,21 @@ async function submitEntry() {
     }
 }
 
+async function deleteEntry(entryId) {
+    resetMessages();
+    state.deletingEntryId = entryId;
+
+    try {
+        await window.axios.delete(`/api/journal-entries/${entryId}`);
+        state.success = 'Journal entry deleted.';
+        await Promise.all([fetchEntries(), fetchTrialBalance()]);
+    } catch (error) {
+        state.error = 'Unable to delete journal entry.';
+    } finally {
+        state.deletingEntryId = null;
+    }
+}
+
 async function bootstrap() {
     state.loading = true;
     resetMessages();
@@ -175,7 +209,7 @@ onMounted(() => {
 <template>
     <main class="app-shell">
         <div class="hero">
-            <p class="eyebrow">Ledger Workspace</p>
+            <p></p>
             <h1>Mini Accounting Module</h1>
             <p>Double-entry journals with live balancing and trial balance reporting.</p>
         </div>
@@ -196,15 +230,10 @@ onMounted(() => {
                         <input v-model="entryForm.entry_date" type="date" />
                     </label>
                     <label>
-                        Reference
-                        <input v-model="entryForm.reference_no" type="text" placeholder="Optional" />
+                        Description
+                        <input v-model="entryForm.description" type="text" placeholder="Entry description" />
                     </label>
                 </div>
-
-                <label>
-                    Description
-                    <input v-model="entryForm.description" type="text" placeholder="Entry description" />
-                </label>
 
                 <p v-if="fieldErrors.entry_date" class="field-error">{{ fieldErrors.entry_date[0] }}</p>
                 <p v-if="fieldErrors.lines" class="field-error">{{ fieldErrors.lines[0] }}</p>
@@ -326,10 +355,19 @@ onMounted(() => {
 
                 <div v-for="entry in state.entries" :key="entry.id" class="entry-item">
                     <header>
-                        <p>
-                            <strong>{{ entry.entry_date }}</strong>
-                            <span v-if="entry.reference_no"> | {{ entry.reference_no }}</span>
-                        </p>
+                        <div class="entry-meta">
+                            <p>
+                                <strong>{{ formatDateOnly(entry.entry_date) }}</strong>
+                            </p>
+                            <button
+                                type="button"
+                                class="icon danger"
+                                :disabled="state.deletingEntryId === entry.id"
+                                @click="deleteEntry(entry.id)"
+                            >
+                                {{ state.deletingEntryId === entry.id ? 'Deleting...' : 'Delete' }}
+                            </button>
+                        </div>
                         <p>{{ entry.description || 'No description' }}</p>
                     </header>
                     <table>
@@ -337,6 +375,7 @@ onMounted(() => {
                             <tr>
                                 <th>Account</th>
                                 <th>Type</th>
+                                <th>Line Description</th>
                                 <th class="right">Amount</th>
                             </tr>
                         </thead>
@@ -344,6 +383,7 @@ onMounted(() => {
                             <tr v-for="line in entry.lines" :key="line.id">
                                 <td>{{ line.account?.code }} - {{ line.account?.name }}</td>
                                 <td class="capitalize">{{ line.type }}</td>
+                                <td>{{ line.line_description || '-' }}</td>
                                 <td class="right">{{ money(line.amount) }}</td>
                             </tr>
                         </tbody>
@@ -353,4 +393,3 @@ onMounted(() => {
         </section>
     </main>
 </template>
-

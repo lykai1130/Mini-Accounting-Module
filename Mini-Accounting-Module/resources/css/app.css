@@ -285,8 +285,21 @@ tfoot th {
     margin-bottom: 0.35rem;
 }
 
+.entry-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
 .entry-item header p {
     margin: 0;
+}
+
+.danger {
+    color: var(--bad);
+    background: #fff2ef;
+    border-color: #f3c8c1;
 }
 
 .empty {
